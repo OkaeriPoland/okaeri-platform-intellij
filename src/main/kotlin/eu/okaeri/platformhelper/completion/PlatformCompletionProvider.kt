@@ -73,7 +73,8 @@ class PlatformCompletionProvider : CompletionProvider<CompletionParameters>() {
                                 )
                                 .withTypeText(it.containingClass?.name, true)
                                 .withBoldness(true)
-                                .withIcon(PlatformIcons.Okaeri), Double.MAX_VALUE
+                                .withIcon(PlatformIcons.Okaeri),
+                            Double.MAX_VALUE
                         )
                     }
                 }
@@ -104,7 +105,8 @@ class PlatformCompletionProvider : CompletionProvider<CompletionParameters>() {
                             )
                             .withTypeText(it.containingClass?.name, true)
                             .withBoldness(true)
-                            .withIcon(PlatformIcons.Okaeri), Double.MAX_VALUE
+                            .withIcon(PlatformIcons.Okaeri),
+                        Double.MAX_VALUE
                     )
                 }
             )
