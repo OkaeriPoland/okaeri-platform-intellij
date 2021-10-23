@@ -65,10 +65,12 @@ class PlatformCompletionProvider : CompletionProvider<CompletionParameters>() {
                     it.fields.map {
                         PrioritizedLookupElement.withPriority(
                             LookupElementBuilder.create("\${${toKeyName(it.name, strategy, modifier)}}")
-                                .withTailText(when (val text = it.initializer?.text) {
-                                    null -> null
-                                    else -> "=$text"
-                                }, true)
+                                .withTailText(
+                                    when (val text = it.initializer?.text) {
+                                        null -> null
+                                        else -> "=$text"
+                                    }, true
+                                )
                                 .withTypeText(it.containingClass?.name, true)
                                 .withBoldness(true)
                                 .withIcon(PlatformIcons.Okaeri), Double.MAX_VALUE
@@ -87,16 +89,19 @@ class PlatformCompletionProvider : CompletionProvider<CompletionParameters>() {
             return result.addAllElements(beans
                 .map {
                     val beanAnnotation = it.annotations.find { it.hasQualifiedName(OKAERI_PLATFORM_ANNOTATION_BEAN) }?.parameterList?.attributes
-                    val name = when (val value = (beanAnnotation?.find { it.name == null || it.name == OKAERI_PLATFORM_ANNOTATION_BEAN_VALUE }?.value?.lastChild?.parent as PsiLiteralExpression).value as String?) {
+                    val valueParam = beanAnnotation?.find { it.name == null || it.name == OKAERI_PLATFORM_ANNOTATION_BEAN_VALUE }
+                    val name = when (val value = (valueParam?.value?.lastChild?.parent as PsiLiteralExpression).value as String?) {
                         null -> it.name
                         else -> value
                     }
                     PrioritizedLookupElement.withPriority(
                         LookupElementBuilder.create(name)
-                            .withTailText(when (val text = it.returnType?.presentableText) {
-                                null -> null
-                                else -> " $text"
-                            }, true)
+                            .withTailText(
+                                when (val text = it.returnType?.presentableText) {
+                                    null -> null
+                                    else -> " $text"
+                                }, true
+                            )
                             .withTypeText(it.containingClass?.name, true)
                             .withBoldness(true)
                             .withIcon(PlatformIcons.Okaeri), Double.MAX_VALUE
