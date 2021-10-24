@@ -1,12 +1,10 @@
 package eu.okaeri.platformhelper.reference
 
-import com.intellij.openapi.roots.FileIndexFacade
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.searches.AnnotatedElementsSearch
 import com.intellij.psi.util.parentOfTypes
 import com.intellij.util.ProcessingContext
-import eu.okaeri.platformhelper.completion.PlatformCompletion
+import eu.okaeri.platformhelper.util.*
 
 
 class PlatformReferenceProvider : PsiReferenceProvider() {
@@ -21,42 +19,22 @@ class PlatformReferenceProvider : PsiReferenceProvider() {
 
         val annotationName = annotation.qualifiedName
         val annotationParamName = nameValuePair.name
-        val allowedNames = PlatformCompletion.ALL_ANNOTATION_STRINGS[annotation.qualifiedName] ?: return PsiReference.EMPTY_ARRAY
+        val allowedNames = ALL_ANNOTATION_STRINGS[annotation.qualifiedName] ?: return PsiReference.EMPTY_ARRAY
 
         if (annotationParamName != null && annotationParamName !in allowedNames) {
             return PsiReference.EMPTY_ARRAY
         }
 
+        // okaeri-commands
+        if ((OKAERI_COMMANDS_ANNOTATION_EXECUTOR == annotationName || OKAERI_COMMANDS_ANNOTATION_COMMAND == annotationName) && (value.startsWith("\${") && value.endsWith("}"))) {
+            return arrayOf(PlatformLocaleReference(nameValuePair.value!!, TextRange(3, nameValuePair.value!!.textLength - 2), value.substring(2, value.length - 1)))
+        }
+
         // okaeri-injector
-        if (PlatformCompletion.OKAERI_INJECTOR_ANNOTATION_INJECT == annotationName && (annotationParamName == null || PlatformCompletion.OKAERI_INJECTOR_ANNOTATION_INJECT_VALUE == annotationParamName)) {
-            // okaeri-injector
-            return arrayOf(PsiReferenceBase.Immediate(element, this.findBean(element)))
+        if (OKAERI_INJECTOR_ANNOTATION_INJECT == annotationName && (annotationParamName == null || OKAERI_INJECTOR_ANNOTATION_INJECT_VALUE == annotationParamName)) {
+            return arrayOf(PlatformBeanReference(element, TextRange(1, element.textLength - 1), element.value as String))
         }
 
         return PsiReference.EMPTY_ARRAY
-    }
-
-    private fun findBean(inject: PsiElement): PsiElement? {
-
-        val key = (inject as PsiLiteralExpression).value as String
-        val project = inject.project
-        val module = FileIndexFacade.getInstance(project).getModuleForFile(inject.containingFile.virtualFile) ?: return null
-        val scope = GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module)
-
-        val bean = JavaPsiFacade.getInstance(project).findClass(PlatformCompletion.OKAERI_PLATFORM_ANNOTATION_BEAN, scope) ?: return null
-        val beans = AnnotatedElementsSearch.searchPsiMethods(bean, scope)
-
-        return beans
-            .map {
-                val beanAnnotation = it.annotations.find { it.hasQualifiedName(PlatformCompletion.OKAERI_PLATFORM_ANNOTATION_BEAN) }!!
-                val valueParam = beanAnnotation.parameterList.attributes.find { it.name == null || it.name == PlatformCompletion.OKAERI_PLATFORM_ANNOTATION_BEAN_VALUE }
-                val name = when (val value = (valueParam?.value?.lastChild?.parent as PsiLiteralExpression).value as String?) {
-                    null -> it.name
-                    else -> value
-                }
-                Pair(beanAnnotation, name)
-            }
-            .find { it.second == key }
-            ?.first
     }
 }

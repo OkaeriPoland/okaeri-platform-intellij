@@ -8,16 +8,11 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-<!--        <completion.confidence-->
-<!--                language="JVM"-->
-<!--                implementationClass="eu.okaeri.platformhelper.completion.PlatformCompletionConfidence"-->
-<!--                order="before javaSkipAutopopupInStrings"-->
-<!--        />-->
-<!--        <completion.contributor-->
-<!--                language="JVM"-->
-<!--                implementationClass="eu.okaeri.platformhelper.completion.PlatformCompletionContributor"-->
-<!--                order="first"-->
-<!--        />-->
+        <completion.confidence
+                language="JVM"
+                implementationClass="eu.okaeri.platformhelper.completion.PlatformCompletionConfidence"
+                order="before javaSkipAutopopupInStrings"
+        />
         <psi.referenceContributor
             language="JVM"
             implementation="eu.okaeri.platformhelper.reference.PlatformReferenceContributor"

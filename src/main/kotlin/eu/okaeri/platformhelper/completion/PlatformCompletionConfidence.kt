@@ -7,7 +7,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNameValuePair
 import com.intellij.psi.util.parentOfTypes
 import com.intellij.util.ThreeState
-import eu.okaeri.platformhelper.completion.PlatformCompletion.Companion.ALL_ANNOTATION_STRINGS
+import eu.okaeri.platformhelper.util.ALL_ANNOTATION_STRINGS
 
 class PlatformCompletionConfidence : CompletionConfidence() {
 
