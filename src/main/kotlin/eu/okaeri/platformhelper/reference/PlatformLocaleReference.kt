@@ -7,7 +7,11 @@ import com.intellij.psi.*
 import eu.okaeri.platformhelper.PlatformIcons
 import eu.okaeri.platformhelper.util.*
 
-class PlatformLocaleReference(element: PsiElement, range: TextRange, private val key: String) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
+class PlatformLocaleReference(
+    element: PsiElement,
+    range: TextRange,
+    private val key: String
+) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
 
     override fun resolve(): PsiElement? {
         val resolveResults = multiResolve(false)

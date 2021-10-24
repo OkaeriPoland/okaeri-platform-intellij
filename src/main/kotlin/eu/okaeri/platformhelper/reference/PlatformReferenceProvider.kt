@@ -2,6 +2,7 @@ package eu.okaeri.platformhelper.reference
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
+import com.intellij.psi.util.PsiTypesUtil.getPsiClass
 import com.intellij.psi.util.parentOfTypes
 import com.intellij.util.ProcessingContext
 import eu.okaeri.platformhelper.util.*
@@ -32,12 +33,14 @@ class PlatformReferenceProvider : PsiReferenceProvider() {
 
         // okaeri-injector (@Inject) -> @Bean
         if (OKAERI_INJECTOR_ANNOTATION_INJECT == annotationName && (annotationParamName == null || OKAERI_INJECTOR_ANNOTATION_INJECT_VALUE == annotationParamName)) {
-            return arrayOf(PlatformBeanReference(element, TextRange(1, element.textLength - 1), element.value as String))
+            val field = element.parentOfTypes(PsiField::class) ?: return PsiReference.EMPTY_ARRAY
+            return arrayOf(PlatformBeanReference(element, TextRange(1, element.textLength - 1), getPsiClass(field.type), element.value as String))
         }
 
         // okaeri-platform (@Bean) -> @Inject
         if (OKAERI_PLATFORM_ANNOTATION_BEAN == annotationName && (annotationParamName == null || OKAERI_PLATFORM_ANNOTATION_BEAN_VALUE == annotationParamName)) {
-            return arrayOf(PlatformInjectReference(element, TextRange(1, element.textLength - 1), element.value as String))
+            val method = element.parentOfTypes(PsiMethod::class) ?: return PsiReference.EMPTY_ARRAY
+            return arrayOf(PlatformInjectReference(element, TextRange(1, element.textLength - 1), getPsiClass(method.returnType), element.value as String))
         }
 
         return PsiReference.EMPTY_ARRAY

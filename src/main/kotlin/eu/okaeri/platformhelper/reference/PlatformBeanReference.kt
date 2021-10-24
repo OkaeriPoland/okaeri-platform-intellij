@@ -4,12 +4,19 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
+import com.intellij.psi.util.PsiTypesUtil
 import eu.okaeri.platformhelper.PlatformIcons
 import eu.okaeri.platformhelper.util.OKAERI_PLATFORM_ANNOTATION_BEAN
 import eu.okaeri.platformhelper.util.findAnnotatedMethods
 import eu.okaeri.platformhelper.util.getBeanNameFromMethod
 
-class PlatformBeanReference(element: PsiElement, range: TextRange, private val name: String) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
+class PlatformBeanReference(
+    element: PsiElement,
+    range: TextRange,
+    private val type: PsiClass?,
+    private val name: String,
+    private val typeSearch: Boolean = false // use true when reference is from unnamed inject
+) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
 
     override fun resolve(): PsiElement? {
         val resolveResults = multiResolve(false)
@@ -19,7 +26,7 @@ class PlatformBeanReference(element: PsiElement, range: TextRange, private val n
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         return findAnnotatedMethods(OKAERI_PLATFORM_ANNOTATION_BEAN, myElement!!)
             ?.map { Pair(it, getBeanNameFromMethod(it)!!) }
-            ?.filter { it.second == name }
+            ?.filter { it.second == name || (typeSearch && PsiTypesUtil.getPsiClass(it.first.returnType) == type) }
             ?.map { PsiElementResolveResult(it.first) }
             ?.toTypedArray()
             ?: PsiElementResolveResult.EMPTY_ARRAY

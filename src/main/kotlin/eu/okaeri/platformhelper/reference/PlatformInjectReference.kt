@@ -4,12 +4,19 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
+import com.intellij.psi.util.PsiTypesUtil.getPsiClass
 import eu.okaeri.platformhelper.PlatformIcons
 import eu.okaeri.platformhelper.util.OKAERI_INJECTOR_ANNOTATION_INJECT
 import eu.okaeri.platformhelper.util.findAnnotatedFields
 import eu.okaeri.platformhelper.util.getInjectNameFromField
+import eu.okaeri.platformhelper.util.hasInjectName
 
-class PlatformInjectReference(element: PsiElement, range: TextRange, private val name: String) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
+class PlatformInjectReference(
+    element: PsiElement,
+    range: TextRange,
+    private val type: PsiClass?,
+    private val name: String
+) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
 
     override fun resolve(): PsiElement? {
         val resolveResults = multiResolve(false)
@@ -19,7 +26,7 @@ class PlatformInjectReference(element: PsiElement, range: TextRange, private val
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         return findAnnotatedFields(OKAERI_INJECTOR_ANNOTATION_INJECT, myElement!!)
             ?.map { Pair(it, getInjectNameFromField(it)!!) }
-            ?.filter { it.second == name }
+            ?.filter { it.second == name || (!hasInjectName(it.first) && getPsiClass(it.first.type) == type) }
             ?.map { PsiElementResolveResult(it.first) }
             ?.toTypedArray()
             ?: PsiElementResolveResult.EMPTY_ARRAY

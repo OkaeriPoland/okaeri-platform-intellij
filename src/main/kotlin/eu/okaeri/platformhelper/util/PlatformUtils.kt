@@ -34,6 +34,11 @@ fun getInjectNameFromField(field: PsiField): String? {
     }
 }
 
+fun hasInjectName(field: PsiField): Boolean {
+    val annotation = findAnnotation(field, OKAERI_INJECTOR_ANNOTATION_INJECT) ?: return false
+    return annotation.parameterList.attributes.find { it.name == null || it.name == OKAERI_INJECTOR_ANNOTATION_INJECT_VALUE } != null
+}
+
 // okaeri-configs
 fun toConfigKeyName(fieldName: String, strategy: String?, modifier: String?): String {
     var result = fieldName
