@@ -10,7 +10,8 @@ import eu.okaeri.platformhelper.util.*
 class PlatformLocaleReference(element: PsiElement, range: TextRange, private val key: String) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
 
     override fun resolve(): PsiElement? {
-        return multiResolve(false).map { it.element }.firstOrNull()
+        val resolveResults = multiResolve(false)
+        return if (resolveResults.size == 1) resolveResults[0].element else null
     }
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {

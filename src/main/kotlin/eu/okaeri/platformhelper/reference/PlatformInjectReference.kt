@@ -5,11 +5,11 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import eu.okaeri.platformhelper.PlatformIcons
-import eu.okaeri.platformhelper.util.OKAERI_PLATFORM_ANNOTATION_BEAN
-import eu.okaeri.platformhelper.util.findAnnotatedMethods
-import eu.okaeri.platformhelper.util.getBeanNameFromMethod
+import eu.okaeri.platformhelper.util.OKAERI_INJECTOR_ANNOTATION_INJECT
+import eu.okaeri.platformhelper.util.findAnnotatedFields
+import eu.okaeri.platformhelper.util.getInjectNameFromField
 
-class PlatformBeanReference(element: PsiElement, range: TextRange, private val name: String) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
+class PlatformInjectReference(element: PsiElement, range: TextRange, private val name: String) : PsiReferenceBase<PsiElement?>(element, range, true), PsiPolyVariantReference {
 
     override fun resolve(): PsiElement? {
         val resolveResults = multiResolve(false)
@@ -17,8 +17,8 @@ class PlatformBeanReference(element: PsiElement, range: TextRange, private val n
     }
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
-        return findAnnotatedMethods(OKAERI_PLATFORM_ANNOTATION_BEAN, myElement!!)
-            ?.map { Pair(it, getBeanNameFromMethod(it)!!) }
+        return findAnnotatedFields(OKAERI_INJECTOR_ANNOTATION_INJECT, myElement!!)
+            ?.map { Pair(it, getInjectNameFromField(it)!!) }
             ?.filter { it.second == name }
             ?.map { PsiElementResolveResult(it.first) }
             ?.toTypedArray()
@@ -26,17 +26,12 @@ class PlatformBeanReference(element: PsiElement, range: TextRange, private val n
     }
 
     override fun getVariants(): Array<Any> {
-        return findAnnotatedMethods(OKAERI_PLATFORM_ANNOTATION_BEAN, myElement!!)
-            ?.map { Pair(it, getBeanNameFromMethod(it)!!) }
+        return findAnnotatedFields(OKAERI_INJECTOR_ANNOTATION_INJECT, myElement!!)
+            ?.map { Pair(it, getInjectNameFromField(it)!!) }
             ?.map {
                 PrioritizedLookupElement.withPriority(
                     LookupElementBuilder.create(it.second)
-                        .withTailText(
-                            when (val text = it.first.returnType?.presentableText) {
-                                null -> ""
-                                else -> " $text"
-                            }, true
-                        )
+                        .withTailText(" ${it.first.type.presentableText}", true)
                         .withTypeText(it.first.containingClass?.name, true)
                         .withBoldness(true)
                         .withIcon(PlatformIcons.Okaeri),

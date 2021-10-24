@@ -16,8 +16,20 @@ fun getBeanNameFromMethod(method: PsiMethod): String? {
     val annotation = findAnnotation(method, OKAERI_PLATFORM_ANNOTATION_BEAN) ?: return null
     val valueParam = annotation.parameterList.attributes.find { it.name == null || it.name == OKAERI_PLATFORM_ANNOTATION_BEAN_VALUE }
 
-    return when (val value = (valueParam?.value?.lastChild?.parent as PsiLiteralExpression).value as String?) {
+    return when (val value = (valueParam?.value?.lastChild?.parent as PsiLiteralExpression?)?.value as String?) {
         null -> method.name
+        else -> value
+    }
+}
+
+// okaeri-injector (@Inject)
+fun getInjectNameFromField(field: PsiField): String? {
+
+    val annotation = findAnnotation(field, OKAERI_INJECTOR_ANNOTATION_INJECT) ?: return null
+    val valueParam = annotation.parameterList.attributes.find { it.name == null || it.name == OKAERI_INJECTOR_ANNOTATION_INJECT_VALUE }
+
+    return when (val value = (valueParam?.value?.lastChild?.parent as PsiLiteralExpression?)?.value as String?) {
+        null -> field.name
         else -> value
     }
 }
@@ -47,6 +59,16 @@ fun findAnnotatedMethods(annotationClazz: String, element: PsiElement): Query<Ps
     return findAnnotatedMethods(annotationClazz, element.project, findModule(element)!!)
 }
 
+fun findAnnotatedFields(annotationClazz: String, project: Project, module: Module): Query<PsiField>? {
+    val scope = GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module)
+    val annotation = JavaPsiFacade.getInstance(project).findClass(annotationClazz, scope) ?: return null
+    return AnnotatedElementsSearch.searchPsiFields(annotation, scope)
+}
+
+fun findAnnotatedFields(annotationClazz: String, element: PsiElement): Query<PsiField>? {
+    return findAnnotatedFields(annotationClazz, element.project, findModule(element)!!)
+}
+
 fun findModule(element: PsiElement): Module? {
     return FileIndexFacade.getInstance(element.project).getModuleForFile(element.containingFile.originalFile.virtualFile)
 }
@@ -67,6 +89,10 @@ fun findAnnotation(method: PsiMethod, annotationClazz: String): PsiAnnotation? {
 
 fun findAnnotation(clazz: PsiClass, annotationClazz: String): PsiAnnotation? {
     return clazz.annotations.find { it.hasQualifiedName(annotationClazz) }
+}
+
+fun findAnnotation(method: PsiField, annotationClazz: String): PsiAnnotation? {
+    return method.annotations.find { it.hasQualifiedName(annotationClazz) }
 }
 
 fun findAnnotationValue(annotation: PsiAnnotation?, name: String): String? {

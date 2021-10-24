@@ -25,14 +25,19 @@ class PlatformReferenceProvider : PsiReferenceProvider() {
             return PsiReference.EMPTY_ARRAY
         }
 
-        // okaeri-commands
+        // okaeri-commands (@Command, @Executor) -> LocaleConfig field
         if ((OKAERI_COMMANDS_ANNOTATION_EXECUTOR == annotationName || OKAERI_COMMANDS_ANNOTATION_COMMAND == annotationName) && (value.startsWith("\${") && value.endsWith("}"))) {
             return arrayOf(PlatformLocaleReference(nameValuePair.value!!, TextRange(3, nameValuePair.value!!.textLength - 2), value.substring(2, value.length - 1)))
         }
 
-        // okaeri-injector
+        // okaeri-injector (@Inject) -> @Bean
         if (OKAERI_INJECTOR_ANNOTATION_INJECT == annotationName && (annotationParamName == null || OKAERI_INJECTOR_ANNOTATION_INJECT_VALUE == annotationParamName)) {
             return arrayOf(PlatformBeanReference(element, TextRange(1, element.textLength - 1), element.value as String))
+        }
+
+        // okaeri-platform (@Bean) -> @Inject
+        if (OKAERI_PLATFORM_ANNOTATION_BEAN == annotationName && (annotationParamName == null || OKAERI_PLATFORM_ANNOTATION_BEAN_VALUE == annotationParamName)) {
+            return arrayOf(PlatformInjectReference(element, TextRange(1, element.textLength - 1), element.value as String))
         }
 
         return PsiReference.EMPTY_ARRAY
