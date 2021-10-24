@@ -40,8 +40,8 @@ class PlatformCompletionProvider : CompletionProvider<CompletionParameters>() {
         val annotation = parameters.position.parentOfTypes(PsiAnnotation::class) ?: return
 
         val annotationName = annotation.qualifiedName
-        val allowedNames = PlatformCompletion.ALL_ANNOTATION_STRINGS[annotationName] ?: return
         val annotationParamName = nameValuePair.name
+        val allowedNames = PlatformCompletion.ALL_ANNOTATION_STRINGS[annotationName] ?: return
 
         if (annotationParamName != null && annotationParamName !in allowedNames) {
             return
@@ -74,7 +74,7 @@ class PlatformCompletionProvider : CompletionProvider<CompletionParameters>() {
                                 .withTypeText(it.containingClass?.name, true)
                                 .withBoldness(true)
                                 .withIcon(PlatformIcons.Okaeri),
-                            Double.MAX_VALUE
+                            1000.0
                         )
                     }
                 }
@@ -106,7 +106,7 @@ class PlatformCompletionProvider : CompletionProvider<CompletionParameters>() {
                             .withTypeText(it.containingClass?.name, true)
                             .withBoldness(true)
                             .withIcon(PlatformIcons.Okaeri),
-                        Double.MAX_VALUE
+                        1000.0
                     )
                 }
             )
