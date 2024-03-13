@@ -14,10 +14,15 @@
                 order="before javaSkipAutopopupInStrings"
         />
         <psi.referenceContributor
-            language="JVM"
-            implementation="eu.okaeri.platformhelper.reference.PlatformReferenceContributor"
-            order="first"
+                language="JVM"
+                implementation="eu.okaeri.platformhelper.reference.PlatformReferenceContributor"
+                order="first"
         />
+<!--        <lang.refactoringSupport-->
+<!--                language="JVM"-->
+<!--                implementationClass="eu.okaeri.platformhelper.refactoring.PlatformRefactoringSupportProvider"-->
+<!--                order="first"-->
+<!--        />-->
     </extensions>
 
 </idea-plugin>
